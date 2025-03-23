@@ -14,8 +14,7 @@ class PersianMessageApp(QMainWindow):
         # ایجاد لیبل با متن مورد نظر
         self.label = QLabel(self)
         self.label.setText(
-            "Hello World! We need to push an update.\n"
-            "(We've worked so hard our mouths are tired - دهنتمون سرویس شده اینقدر کار کردیم)"
+            "Hello World! We need to push an update."
         )
         
         # تنظیم استایل و فونت
