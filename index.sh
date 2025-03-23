@@ -13,41 +13,50 @@ sed -i 's/^erver/Server/g' /etc/pacman.d/mirrorlist
 pacman -R --noconfirm neofetch-git 2>/dev/null
 
 # Install required packages
-pacman -S --noconfirm neofetch curl feh plasma-desktop kdeplasma-addons || { echo "Package installation failed"; exit 1; }
+pacman -S --noconfirm neofetch curl || { echo "Package installation failed"; exit 1; }
 
-# Set custom background
-BG_URL="https://abinot.ir/file/images/d_bg_abinot.jpg"
-BG_PATH="/usr/share/wallpapers/abinot_wallpaper.jpg"
-curl -L --retry 3 --retry-delay 5 "$BG_URL" -o "$BG_PATH" || { echo "Failed to download wallpaper"; exit 1; }
+# Change hostname and related settings
+NEW_HOSTNAME="Abinot"
+CLEAN_HOSTNAME="Abinot"
 
-# User-specific configuration
-sudo -u $SUDO_USER bash <<'EOF'
-export $(dbus-launch)
+# Set hostname
+hostnamectl set-hostname "$NEW_HOSTNAME"
 
-# KDE Plasma configuration
-if [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
-    kwriteconfig5 --file "$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc" \
-        --group Containments --group 1 --group Wallpaper --group org.kde.image --group General \
-        --key Image "file:///usr/share/wallpapers/abinot_wallpaper.jpg"
-    plasmashell --replace &
-elif [ -n "$DISPLAY" ]; then
-    feh --bg-scale "/usr/share/wallpapers/abinot_wallpaper.jpg"
-fi
+# Update hosts file
+sed -i "/127.0.1.1/c\127.0.1.1\t$CLEAN_HOSTNAME" /etc/hosts
+
+# Update hostname in pam files
+sed -i "s/ab@asus-tuf-f15-/ab@$CLEAN_HOSTNAME/" /etc/pam.d/* 2>/dev/null
+
+# System-wide OS identification
+cat > /etc/os-release <<EOF
+NAME="$CLEAN_HOSTNAME"
+PRETTY_NAME="$CLEAN_HOSTNAME Ultimate Edition"
+ID=abinot
+ID_LIKE=arch
+ANSI_COLOR="0;36"
+HOME_URL="https://abinot.ir/"
+SUPPORT_URL="https://abinot.ir/support"
+BUG_REPORT_URL="https://abinot.ir/support"
+LOGO=abinot-logo
 EOF
 
-# Change hostname
-NEW_HOSTNAME="Abinot-OS"
-hostnamectl set-hostname "$NEW_HOSTNAME"
-echo "$NEW_HOSTNAME" > /etc/hostname
-sed -i "s/127.0.1.1.*/127.0.1.1\t$NEW_HOSTNAME/" /etc/hosts
+# Create additional identification files
+echo "$CLEAN_HOSTNAME" > /etc/issue
+echo "$CLEAN_HOSTNAME" > /etc/issue.net
+cat > /etc/lsb-release <<EOF
+DISTRIB_ID=$CLEAN_HOSTNAME
+DISTRIB_RELEASE="24.1"
+DISTRIB_DESCRIPTION="$CLEAN_HOSTNAME"
+DISTRIB_CODENAME=persian
+EOF
 
 # Neofetch configuration
 mkdir -p /etc/neofetch
 cat > /etc/neofetch/config.conf <<'EOF'
 print_info() {
-    info title
     info underline
-    
+    prin "$(color 6)███▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀███"
     info "OS" distro
     info "Host" model
     info "Kernel" kernel
@@ -57,35 +66,32 @@ print_info() {
     info "Resolution" resolution
     info "DE" de
     info "WM" wm
-    info "WM Theme" wm_theme
-    info "Theme" theme
-    info "Icons" icons
     info "Terminal" term
-    info "Terminal Font" term_font
     info "CPU" cpu
     info "GPU" gpu
     info "Memory" memory
-    
-    info cols
+    prin "$(color 6)███▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄███"
 }
 
-print_ascii on
-ascii_distro="abinot_os"
+distro="$CLEAN_HOSTNAME"
+ascii_distro="$CLEAN_HOSTNAME"
 
-# Custom ASCII art
-abinot_os() {
+print_ascii on
+ascii_colors=(6 6 6 6 6 6)
+ascii_bold=on
+
+$CLEAN_HOSTNAME() {
     cat <<'EOM'
-${c1}          ████████████████████          
+${c6}          ████████████████████          
       ██████▀░░░░░░░░▀▀██████      
     ████▀░░░░░░░░░░░░░░░░▀████    
   ███▀░░░░░░░░░░░░░░░░░░░░░░▀███  
   ██░░░░░░░░░░░░░░░░░░░░░░░░░░██  
-██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
-██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
-██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
-██░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
-███░░░░░░░░░░░░░░░░░░░░░░░░░███  
-  ███▄░░░░░░░░░░░░░░░░░░░░░▄███    
+██░░░░▄▄▄▄▄▄▄░░░░░░░░▄▄▄▄▄▄▄░░░░██
+██░░▐████▀████▄░░░▄████▀████▌░░██
+██░░░░▀▀▀▄▀▀▀███▄███▀▀▀▄▀▀▀░░░░██
+███░░░░░░▄█████▌▐█████▄░░░░░░███  
+  ███▄░░░░▀▀▀▀▀░░▀▀▀▀▀░░░░▄███    
     ████▄▄░░░░░░░░░░░░░░▄▄████      
       ███████▄▄▄▄▄▄▄▄████████        
           ████████████████████        
@@ -94,24 +100,13 @@ EOM
 
 title_fqdn=off
 kernel_shorthand=on
-distro_shorthand=on
+distro_shorthand=off
 EOF
 
-# OS identification
-cat > /etc/os-release <<EOF
-NAME="Abinot OS"
-PRETTY_NAME="Abinot OS Ultimate Edition"
-ID=abinot
-ID_LIKE=arch
-ANSI_COLOR="0;36"
-HOME_URL="https://abinot.ir/"
-SUPPORT_URL="https://abinot.ir/support"
-BUG_REPORT_URL="https://abinot.ir/bugs"
-LOGO=abinot-logo
-EOF
+# Force refresh system info
+kbuildsycoca5 2>/dev/null
+systemctl daemon-reload
 
-echo "تمامی تغییرات با موفقیت اعمال شد!"
-echo "برای اعمال کامل تغییرات:"
-echo "1. از سیستم خارج شده و مجدد وارد شوید"
-echo "2. دستور neofetch را اجرا کنید"
-echo "3. در صورت نیاز سیستم را ریاستارت کنید"
+echo "
+تمامی تغییرات با موفقیت اعمال شد!
+"
