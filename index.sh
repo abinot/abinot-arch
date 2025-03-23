@@ -6,23 +6,34 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-# Enable required packages
-pacman -S --noconfirm neofetch curl feh plasma-desktop kdeplasma-addons 
+# Fix mirrorlist errors
+sed -i 's/^erver/Server/g' /etc/pacman.d/mirrorlist
+
+# Remove conflicting neofetch version
+pacman -R --noconfirm neofetch-git 2>/dev/null
+
+# Install required packages
+pacman -S --noconfirm neofetch curl feh plasma-desktop kdeplasma-addons || { echo "Package installation failed"; exit 1; }
 
 # Set custom background
 BG_URL="https://abinot.ir/file/images/d_bg_abinot.jpg"
 BG_PATH="/usr/share/wallpapers/abinot_wallpaper.jpg"
-curl -L "$BG_URL" -o "$BG_PATH" || { echo "Failed to download wallpaper"; exit 1; }
+curl -L --retry 3 --retry-delay 5 "$BG_URL" -o "$BG_PATH" || { echo "Failed to download wallpaper"; exit 1; }
 
-# Set background for KDE Plasma
+# User-specific configuration
+sudo -u $SUDO_USER bash <<'EOF'
+export $(dbus-launch)
+
+# KDE Plasma configuration
 if [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
     kwriteconfig5 --file "$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc" \
         --group Containments --group 1 --group Wallpaper --group org.kde.image --group General \
-        --key Image "file://$BG_PATH"
+        --key Image "file:///usr/share/wallpapers/abinot_wallpaper.jpg"
     plasmashell --replace &
 elif [ -n "$DISPLAY" ]; then
-    feh --bg-scale "$BG_PATH"
+    feh --bg-scale "/usr/share/wallpapers/abinot_wallpaper.jpg"
 fi
+EOF
 
 # Change hostname
 NEW_HOSTNAME="Abinot-OS"
@@ -86,26 +97,21 @@ kernel_shorthand=on
 distro_shorthand=on
 EOF
 
-# Download and set OS logo
-LOGO_URL="https://abinot.ir/file/images/abinot-logo.png"
-LOGO_PATH="/usr/share/pixmaps/abinot-logo.png"
-curl -L "$LOGO_URL" -o "$LOGO_PATH" || { echo "Failed to download logo"; exit 1; }
-
-# Modify OS information
+# OS identification
 cat > /etc/os-release <<EOF
-NAME="Abinot"
-PRETTY_NAME="Abinot"
+NAME="Abinot OS"
+PRETTY_NAME="Abinot OS Ultimate Edition"
 ID=abinot
 ID_LIKE=arch
 ANSI_COLOR="0;36"
 HOME_URL="https://abinot.ir/"
 SUPPORT_URL="https://abinot.ir/support"
-BUG_REPORT_URL="https://abinot.ir/support"
+BUG_REPORT_URL="https://abinot.ir/bugs"
 LOGO=abinot-logo
 EOF
 
-echo "Modifications complete!"
-echo "You may need to:"
-echo "1. Log out and back in for changes to take effect"
-echo "2. Run 'neofetch' to see the new configuration"
-echo "3. Reboot to apply all changes system-wide"
+echo "تمامی تغییرات با موفقیت اعمال شد!"
+echo "برای اعمال کامل تغییرات:"
+echo "1. از سیستم خارج شده و مجدد وارد شوید"
+echo "2. دستور neofetch را اجرا کنید"
+echo "3. در صورت نیاز سیستم را ریاستارت کنید"
