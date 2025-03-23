@@ -1,33 +1,46 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import sys
-from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, 
-                            QPushButton, QVBoxLayout)
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 
-class AdvancedMessage(QWidget):
+class PersianMessageApp(QMainWindow):
     def __init__(self):
         super().__init__()
         
         # تنظیمات پنجره
-        self.setWindowTitle("Abinot Pro")
-        self.setFixedSize(400, 200)
+        self.setWindowTitle("Abinot Update")
+        self.setGeometry(300, 300, 600, 200)
         
-        # ایجاد ویجت‌ها
-        self.label = QLabel("hello world! we have to update something. (this app have a fucking bug)")
-        self.label.setStyleSheet("font-size: 20px; color: #e74c3c;")
+        # ایجاد لیبل با متن مورد نظر
+        self.label = QLabel(self)
+        self.label.setText(
+            "Hello World! We need to push an update.\n"
+            "(We've worked so hard our mouths are tired - دهنتمون سرویس شده اینقدر کار کردیم)"
+        )
         
-        self.btn_close = QPushButton("X")
-        self.btn_close.setStyleSheet("background: #3498db; color: white; padding: 10px;")
-        self.btn_close.clicked.connect(self.close)
-        
-        # لایه‌بندی
-        layout = QVBoxLayout()
-        layout.addWidget(self.label)
-        layout.addWidget(self.btn_close)
-        
-        self.setLayout(layout)
+        # تنظیم استایل و فونت
+        self.label.setStyleSheet("""
+            QLabel {
+                font-size: 18px;
+                color: #ffffff;
+                background-color: #2c3e50;
+                padding: 20px;
+                border-radius: 10px;
+            }
+        """)
+        self.label.setFont(self.get_persian_font())
+        self.label.adjustSize()
+        self.label.move(50, 50)
+
+    def get_persian_font(self):
+        # انتخاب فونت مناسب برای نمایش فارسی
+        font = self.label.font()
+        font.setFamily("Arial")  # یا از فونت‌های فارسی مثل "XB Niloofar" استفاده کنید
+        font.setPointSize(14)
+        return font
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = AdvancedMessage()
+    window = PersianMessageApp()
     window.show()
     sys.exit(app.exec_())
