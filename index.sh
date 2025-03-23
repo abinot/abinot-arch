@@ -13,6 +13,18 @@ pacman -R --noconfirm neofetch-git 2>/dev/null
 # Install required packages
 pacman -S --noconfirm neofetch curl || { echo "Package installation failed"; exit 1; }
 
+# Change hostname and related settings
+NEW_HOSTNAME="Abinot"
+CLEAN_HOSTNAME="Abinot"
+
+# Set hostname
+hostnamectl set-hostname "$NEW_HOSTNAME"
+
+# Update hosts file
+sed -i "/127.0.1.1/c\127.0.1.1\t$CLEAN_HOSTNAME" /etc/hosts
+
+# Update hostname in pam files
+sed -i "s/ab@asus-tuf-f15-/ab@$CLEAN_HOSTNAME/" /etc/pam.d/* 2>/dev/null
 
 
 # System-wide OS identification
@@ -51,6 +63,7 @@ print_info() {
     info "Packages" packages
     info "Shell" shell
     info "Resolution" resolution
+    info "WM" wm
     info "DE" de
     info "Terminal" term
     info "CPU" cpu
