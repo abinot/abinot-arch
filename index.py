@@ -8,7 +8,7 @@ class PersianMessageApp(QMainWindow):
         super().__init__()
         
         # تنظیمات پنجره
-        self.setWindowTitle("Abinot Update")
+        self.setWindowTitle("Abinot")
         self.setGeometry(300, 300, 600, 200)
         
         # ایجاد لیبل با متن مورد نظر
