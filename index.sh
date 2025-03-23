@@ -2,12 +2,10 @@
 
 # Check if running as root
 if [ "$(id -u)" -ne 0 ]; then
-    echo "This script must be run as root!"
+    echo "This script must be run as root! you can run this :"
+    echo "  sudo abinot"
     exit 1
 fi
-
-# Fix mirrorlist errors
-sed -i 's/^erver/Server/g' /etc/pacman.d/mirrorlist
 
 # Remove conflicting neofetch version
 pacman -R --noconfirm neofetch-git 2>/dev/null
@@ -15,23 +13,12 @@ pacman -R --noconfirm neofetch-git 2>/dev/null
 # Install required packages
 pacman -S --noconfirm neofetch curl || { echo "Package installation failed"; exit 1; }
 
-# Change hostname and related settings
-NEW_HOSTNAME="Abinot"
-CLEAN_HOSTNAME="Abinot"
 
-# Set hostname
-hostnamectl set-hostname "$NEW_HOSTNAME"
-
-# Update hosts file
-sed -i "/127.0.1.1/c\127.0.1.1\t$CLEAN_HOSTNAME" /etc/hosts
-
-# Update hostname in pam files
-sed -i "s/ab@asus-tuf-f15-/ab@$CLEAN_HOSTNAME/" /etc/pam.d/* 2>/dev/null
 
 # System-wide OS identification
 cat > /etc/os-release <<EOF
 NAME="$CLEAN_HOSTNAME"
-PRETTY_NAME="$CLEAN_HOSTNAME Ultimate Edition"
+PRETTY_NAME="$CLEAN_HOSTNAME Foundation Edition"
 ID=abinot
 ID_LIKE=arch
 ANSI_COLOR="0;36"
@@ -65,7 +52,6 @@ print_info() {
     info "Shell" shell
     info "Resolution" resolution
     info "DE" de
-    info "WM" wm
     info "Terminal" term
     info "CPU" cpu
     info "GPU" gpu
